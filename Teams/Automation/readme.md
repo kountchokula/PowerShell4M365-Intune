@@ -1,0 +1,1 @@
+This directory contains scripts designed to automate component functions of Teams. The initial project that created these involved standardizing a large group of private teams so all shared common structure, apps, and tags.
