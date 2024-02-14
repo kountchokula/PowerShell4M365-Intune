@@ -1,7 +1,8 @@
 <#
 .DESCRIPTION
   This script can be run standalone or setup as an Azure Automation Runbook. If you are setting this up as an automation runbook, 
-    it is highly recommended to create an Entra App Registration then use the Client ID / Client Secret values as automation variables. The Graph connection section of this script is setup to leverage this using saved Azure Automation variables.
+    it is highly recommended to create an Entra App Registration then use the Client ID / Client Secret values as automation variables. 
+    The Graph connection section of this script is setup to leverage this using saved Azure Automation variables.
   
   The creation/update process is designed to operate using an Entra security group as the source of truth for the tag membership. 
     When run, the script will import the group members to a variable, then compare that to the current membership of the tag. 
