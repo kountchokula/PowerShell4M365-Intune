@@ -1,59 +1,58 @@
 <#
 .DESCRIPTION
-  This script component can be added to any application deployment to create registry entries for use as detection rules.
-  It will create a key under HKLM:\Software with the $orgName variable. A second key will be created under HKLM:\Software\$orgName
-  with the name of your application. Finally, a single value will be created called "Version" - you can use the $version variable
+  This script component can be added to any Intune application deployment package to create registry entries for use as detection rules.
+  It will create a key under HKLM:\SOFTWARE with the $orgName variable. A second key will be created under HKLM:\SOFTWARE\$orgName
+  with the name of your application. Finally, a single value will be created called $keyName - you can use the $keyValue variable
   to increment the deployment versions easily.
 #>
 #############################################################
-## Script Variables
-#############################################################
+## Set registry key version for app detection
+#############################################################	
+# Variables - change these for app and version as needed
+
 # Org Name for registry key folder
 $orgName = "MyCompany"
-# Registry key for deployment
-$key = "ApplicationName"
-# Deployment version
-$version = "1.0"
-
-# DO NOT CHANGE ANYTHING BELOW THIS LINE OR SCRIPT WILL NOT WORK
+# App name for reg key
+$app = "ApplicationName"
+# Key to set for app detection check
+$keyName = "KeyName"
+# Key type
+$keyType = "KeyType"
+# Key value
+$keyValue = "1.0"
 
 #############################################################
-## Set registry key version
+## DO NOT CHANGE ANYTHING BELOW THIS LINE
 #############################################################
-# Check for HKLM:\Software\Talkiatry reg key, create if does not exist
-$orgKey = "HKLM:\Software\$($orgName)"
-$orgKeyExists = Test-Path $orgKey
-if (!$orgExists) {
-    New-Item -Path "HKLM:\Software" -Name $orgName
-    Write-Output "$($orgKey) registry key created"
+# Check for existing org reg key
+$basePath = "HKLM:\SOFTWARE\" + $orgName
+if (!(Test-Path $basePath)) {
+	# Create if not found
+  New-Item -Path "HKLM:\SOFTWARE" -Name $orgName
+	Write-Output "Created '$($basePath)' registry key"
+}
+# Check for existing application reg key
+$appKey = $basePath + "\" + $app
+if (!(Test-Path $appKey)) {
+  # Create if not found
+	New-Item -Path $basePath -Name $app
+	Write-Output "Created '$($appKey)' registry key"
+}
+# Check for detection key (and the correct value)
+$detectionKey = Get-ItemProperty -Path $appKey -Name $keyName
+if (!$detectionKey) {
+  # Create if not found
+  New-ItemProperty -Path $appKey -Name $keyName -PropertyType $keyType -Value $keyValue
+  Write-Output "Created and set '$($keyName)' value in '$($appKey)' and set it to '$($keyValue)'"
 }
 else {
-    Write-Output "$($orgKey) registry key exists"
-}
-# Check for application deployment key, create if does not exist
-$appKey = $orgKey + "\" + $key
-$appKeyExists = Test-Path $appKey
-if (!$appKeyExists) { 
-    New-Item -Path $orgKey -Name $key
-    Write-Output "$($appKey) registry key created"
-}
-else {
-    Write-Output "$($appKey) registry key exists"
-}
-# Set application deployment key version, create if does not exist
-$versionKey = Get-ItemProperty -Path $appKey -Name "Version"
-$versionKeyExists = Test-Path $versionKey
-if (!$versionKeyExists) {
-    New-ItemProperty -Path $appKey -Name "Version" -PropertyType "String" -Value $version
-    Write-Output "Version key value created"
-}
-else {
-    if ($versionKey.Version -ne $version) {
-        # Update value to latest version
-        Set-ItemProperty -Path $appKey -Name "Version" -Value $version
-        Write-Output "Version key value updated to $($version)"
-    }
-    else {
-    Write-Output "Version key value correctly set"
-    }
+  if ($detectionKey.$keyName -ne $keyValue) {
+    # Update value to latest version
+		Set-ItemProperty -Path $appKey -Name $keyName -Value $keyValue
+		Write-Output "'$($keyName)' value updated to '$($keyValue)'"
+  }
+  else {
+    # Output successful verification of correct key/value
+		Write-Output "'$($keyName)' value correctly set"
+  }
 }
