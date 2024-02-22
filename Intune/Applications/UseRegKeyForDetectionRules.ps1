@@ -27,16 +27,16 @@ $keyValue = "1.0"
 # Check for existing org reg key
 $basePath = "HKLM:\SOFTWARE\" + $orgName
 if (!(Test-Path $basePath)) {
-	# Create if not found
+  # Create if not found
   New-Item -Path "HKLM:\SOFTWARE" -Name $orgName
-	Write-Output "Created '$($basePath)' registry key"
+  Write-Output "Created '$($basePath)' registry key"
 }
 # Check for existing application reg key
 $appKey = $basePath + "\" + $app
 if (!(Test-Path $appKey)) {
   # Create if not found
-	New-Item -Path $basePath -Name $app
-	Write-Output "Created '$($appKey)' registry key"
+  New-Item -Path $basePath -Name $app
+  Write-Output "Created '$($appKey)' registry key"
 }
 # Check for detection key (and the correct value)
 $detectionKey = Get-ItemProperty -Path $appKey -Name $keyName
@@ -48,11 +48,11 @@ if (!$detectionKey) {
 else {
   if ($detectionKey.$keyName -ne $keyValue) {
     # Update value to latest version
-		Set-ItemProperty -Path $appKey -Name $keyName -Value $keyValue
-		Write-Output "'$($keyName)' value updated to '$($keyValue)'"
+    Set-ItemProperty -Path $appKey -Name $keyName -Value $keyValue
+    Write-Output "'$($keyName)' value updated to '$($keyValue)'"
   }
   else {
     # Output successful verification of correct key/value
-		Write-Output "'$($keyName)' value correctly set"
+    Write-Output "'$($keyName)' value correctly set"
   }
 }
